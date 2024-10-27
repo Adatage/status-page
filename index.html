@@ -1,11 +1,375 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+        <meta name="description" content="Stay up to date with adatage status page.">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="Status Adatage">
+        <meta property="og:image" content="favicon.png">
+        <meta property="og:description" content="Stay up to date with adatage status page.">
         <title>Status Adatage</title>
+        <link href="https://status.adatage.com" rel="canonical">
+        <link rel="icon" href="favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="favicon.png" type="image/png">
+        <link rel="apple-touch-icon" href="favicon.png">
+        <link rel="apple-touch-icon" sizes="57x57" href="favicon.png">
+        <link rel="apple-touch-icon" sizes="72x72" href="favicon.png">
+        <link rel="apple-touch-icon" sizes="114x114" href="favicon.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="favicon.png">
+        <link rel="apple-touch-icon" sizes="144x144" href="favicon.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="favicon.png">
+        <link rel="stylesheet" href="assets/css/app.css">
     </head>
     <body>
-        
+        <div class="navbar">
+            <div class="content">
+                <div class="brand">
+                    <img src="favicon.png" alt="A">
+                    <h1>datage</h1>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="section-messages"></div>
+            <div class="section-status">
+                <div class="alert alert-green">All Systems Operational</div>
+            </div>
+            <div class="section-scheduled">
+                <div class="timeline schedule">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <strong>Maintenance</strong>
+                        </div>
+                        <div class="list-group">
+                            <div class="list-group-item" id="scheduled-1">
+                                <strong>Demo resets every half hour!</strong> <small class="date"><abbr class="timeago" data-toggle="tooltip" data-placement="right" title="Sunday 27th October 2024 12:30:03" data-timeago="2024-10-27T12:30:03+00:00"></abbr></small>
+                            <div class="pull-right">
+                                <a href="#scheduled-1"><i class="ion ion-link"></i>
+                                </a>
+                            </div>
+                            <div class="markdown-body">
+                                <p>You can schedule downtime for <em>your</em> service!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="section-components"></div>
+        </div>
+        </div>
+        <div class="footer">
+            <p>© <span id="year"></span> Adatage. All rights reserved.</p>
+        </div>
+        <script>
+            document.getElementById("year").innerHTML = (new Date()).getFullYear();
+
+            class StatusPage {
+                constructor(structure) {
+                    this.structure = structure;
+                    this.el = {
+                        summary: document.querySelector('div.alert'),
+                        services: document.querySelector('div.section-components'),
+                        servicesList: {}
+                    };
+                    this.texts = {
+                        1: {
+                            color: "green",
+                            base: "Operational",
+                            full: "All Systems Operational"
+                        },
+                        2: {
+                            color: "blue",
+                            base: "Under Maintenance",
+                            full: "Scheduled Maintenance in Progress"
+                        },
+                        3: {
+                            color: "orange",
+                            base: "Degraded Performance",
+                            full: "Performance Issues Detected"
+                        },
+                        4: {
+                            color: "orange",
+                            base: "Partial Outage",
+                            full: "Partial Service Disruption"
+                        },
+                        5: {
+                            color: "red",
+                            base: "Major Outage",
+                            full: "Major Outage – Service Unavailable"
+                        },
+                        6: {
+                            color: "red",
+                            base: "Service Disruption",
+                            full: "Service Disruption Detected"
+                        }
+                    };
+                    this._addServices();
+                }
+
+                _addServices() {
+                    var otherServices = {};
+                    Object.keys(this.structure.services).forEach((c, i) => {
+                        var ul = document.createElement("ul");
+                        var li_cat = document.createElement("li");
+                        var i_icon = document.createElement("i");
+                        var strong_title = document.createElement("strong");
+                        var div_drop = document.createElement("div");
+                        var div_pright = document.createElement("div");
+                        ul.classList.add("list-group", "components");
+                        li_cat.classList.add("list-group-item", "group-name");
+                        i_icon.classList.add("ion-ios-plus-outline", "group-toggle");
+                        strong_title.innerHTML = " "+this.structure.services[c].name;
+                        div_pright.classList.add("pull-right");
+                        div_drop.classList.add("group-items", "hide");
+                        ul = this.el.services.appendChild(ul);
+                        li_cat = ul.appendChild(li_cat);
+                        i_icon = li_cat.appendChild(i_icon);
+                        strong_title = li_cat.appendChild(strong_title);
+                        div_pright = li_cat.appendChild(div_pright);
+                        div_pright.innerHTML += '<i class="ion ion-ios-circle-filled text-component-1" data-toggle="tooltip" title=""></i>';
+                        div_drop = ul.appendChild(div_drop);
+                        li_cat.onclick = () => {
+                            div_drop.classList.toggle("hide");
+                        };
+                        this.el.servicesList[c] = {
+                            status: div_pright.querySelector("i"),
+                            list: {}
+                        };
+                        Object.keys(this.structure.services[c].list).forEach((s, j) => {
+                            var li_service = document.createElement("li");
+                            var span_title = document.createElement("span");
+                            var div_plright = document.createElement("div");
+                            var small_state = document.createElement("small");
+                            li_service.classList.add("list-group-item", "sub-component", "status-1");
+                            span_title.innerHTML = this.structure.services[c].list[s].name;
+                            div_plright.classList.add("pull-right");
+                            small_state.classList.add("text-component-1");
+                            small_state.setAttribute("data-toggle", "tooltip");
+                            li_service = div_drop.appendChild(li_service);
+                            span_title = li_service.appendChild(span_title);
+                            div_plright = li_service.appendChild(div_plright);
+                            small_state = div_plright.appendChild(small_state);
+                            this.el.servicesList[c].list[s] = {
+                                status: small_state
+                            };
+                            this.updateService(c, s, this.structure.services[c].list[s].state);
+                        });
+                    });
+                }
+
+                updateService(c, s, state) {
+                    this.el.servicesList[c].list[s].status.innerHTML = this.texts[state].base;
+                    this.el.servicesList[c].list[s].status.setAttribute("class", "text-component-1 "+this.texts[state].color);
+                    this.structure.services[c].list[s].state = state;
+                    Object.keys(this.el.servicesList[c].list).forEach((sl, i) => {
+                        if(this.structure.services[c].list[sl].state > state)
+                            state = this.structure.services[c].list[sl].state;
+                    });
+                    this.structure.services[c].state = state;
+                    this.el.servicesList[c].status.setAttribute("class", "ion ion-ios-circle-filled text-component-1 "+this.texts[state].color);
+                    Object.values(this.structure.services).forEach((st) => {
+                        if([st].state > state)
+                            state = [st].state;
+                    });
+                    this.el.summary.classList = "alert alert-"+this.texts[state].color;
+                    this.el.summary.innerHTML = this.texts[state].full;
+                }
+            }
+
+            var sp = new StatusPage({
+                services: {
+                    general: {
+                        name: "General",
+                        list: {
+                            website: {
+                                name: "Website",
+                                state: 1
+                            },
+                            support: {
+                                name: "Support",
+                                state: 1
+                            },
+                            forum: {
+                                name: "Forums",
+                                state: 1
+                            },
+                            cdn: {
+                                name: "CDN",
+                                state: 1
+                            },
+                            webservices: {
+                                name: "Web Services",
+                                state: 1
+                            },
+                            emailserver: {
+                                name: "Email Server",
+                                state: 1
+                            },
+                            authoritativedns: {
+                                name: "Authoritative DNS",
+                                state: 1
+                            }
+                        }
+                    },
+                    cloudgaming: {
+                        name: "Cloud Gaming",
+                        list: {
+                            cloudgamingwebsite: {
+                                name: "Website",
+                                state: 1
+                            },
+                            cloudgamingvms: {
+                                name: "Virtual Machines",
+                                state: 1
+                            },
+                            cloudgamingstorage: {
+                                name: "Storage",
+                                state: 1
+                            }
+                        }
+                    },
+                    cloud: {
+                        name: "Cloud",
+                        list: {
+                            cloudwebsite: {
+                                name: "Website",
+                                state: 1
+                            },
+                            cloudmanagement: {
+                                name: "Management",
+                                state: 1
+                            },
+                            cloudcontainers: {
+                                name: "Containers",
+                                state: 1
+                            },
+                            cloudvms: {
+                                name: "Virtual Machines",
+                                state: 1
+                            },
+                            cloudnetwork: {
+                                name: "Networks",
+                                state: 1
+                            },
+                            cloudapi: {
+                                name: "API",
+                                state: 1
+                            }
+                        }
+                    },
+                    mobileinfo: {
+                        name: "Mobile Info",
+                        list: {
+                            mobileinfowebsite: {
+                                name: "Website",
+                                state: 1
+                            },
+                            mobileinfoservices: {
+                                name: "Services",
+                                state: 1
+                            }
+                        }
+                    },
+                    shortener: {
+                        name: "Shortener",
+                        list: {
+                            shortenerwebsite: {
+                                name: "Website",
+                                state: 1
+                            },
+                            shortenerredir: {
+                                name: "Redirect",
+                                state: 1
+                            },
+                            shortenerapi: {
+                                name: "API",
+                                state: 1
+                            }
+                        }
+                    },
+                    drive: {
+                        name: "Drive",
+                        list: {
+                            drivewebsite: {
+                                name: "Website",
+                                state: 1
+                            },
+                            driveservices: {
+                                name: "Services",
+                                state: 1
+                            },
+                            driveapi: {
+                                name: "API",
+                                state: 1
+                            },
+                            drivestorage: {
+                                name: "Storage",
+                                state: 1
+                            }
+                        }
+                    },
+                    codelab: {
+                        name: "Codelab",
+                        list: {
+                            codelabwebsite: {
+                                name: "Website",
+                                state: 1
+                            },
+                            codelabservices: {
+                                name: "Services",
+                                state: 1
+                            },
+                            codelabapi: {
+                                name: "API",
+                                state: 1
+                            },
+                            codelabcontainers: {
+                                name: "Containers",
+                                state: 1
+                            }
+                        }
+                    },
+                    account: {
+                        name: "Account",
+                        list: {
+                            accountmanagement: {
+                                name: "Management",
+                                state: 1
+                            },
+                            accountservices: {
+                                name: "Services",
+                                state: 1
+                            },
+                            accountapi: {
+                                name: "API",
+                                state: 1
+                            },
+                            account3ndparty: {
+                                name: "3nd Party Apps",
+                                state: 1
+                            }
+                        }
+                    },
+                    chatline: {
+                        name: "Chatline",
+                        list: {
+                            chatlinewebsite: {
+                                name: "Website",
+                                state: 1
+                            },
+                            chatlineservices: {
+                                name: "Services",
+                                state: 1
+                            },
+                            chatlineapi: {
+                                name: "API",
+                                state: 1
+                            }
+                        }
+                    }
+                }
+            });
+        </script>
     </body>
 </html>
