@@ -101,7 +101,9 @@
                         i_icon.classList.add("ion-ios-plus-outline", "group-toggle");
                         strong_title.innerHTML = " "+this.structure.services[c].name;
                         div_pright.classList.add("pull-right");
-                        div_drop.classList.add("group-items", "hide");
+                        div_drop.classList.add("group-items");
+                        if(i != 0)
+                            div_drop.classList.add("hide");
                         ul = this.el.services.appendChild(ul);
                         li_cat = ul.appendChild(li_cat);
                         i_icon = li_cat.appendChild(i_icon);
