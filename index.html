@@ -368,19 +368,34 @@
             }
 
             function connect() {
-                ws = new WebSocket("ws://adatage.com:6580");
-                ws.onopen = () => {
-                    ws.onmessage = (data) => {
-                        data = JSON.parse(data.data);
-                        if(data.action == "hello")
-                            send(data);
-                        if(data.action == "update")
-                            sp.updateService(data.c, data.s, data.state);
+                try {
+                    ws = new WebSocket("ws://adatage.com:6580");
+                    ws.onopen = () => {
+                        ws.onmessage = (data) => {
+                            data = JSON.parse(data.data);
+                            if(data.action == "hello")
+                                send(data);
+                            if(data.action == "update")
+                                sp.updateService(data.c, data.s, data.state);
+                        };
                     };
-                    ws.onerror = () => setTimeout(() => connect(), 5000);
-                    ws.onclose = () => setTimeout(() => connect(), 5000);
-                };
+                    ws.onerror = () => retry();
+                    ws.onclose = () => retry();
+                } catch(e) {
+                    retry();
+                }
             }
+
+            function retry() {
+                Object.keys(sp.el.servicesList).forEach((c) => {
+                    Object.keys(sp.el.servicesList[c].list).forEach((s) => {
+                        sp.updateService(c, s, 6);
+                    });
+                });
+                sp.el.servicesList[c].list[s]
+                setTimeout(() => connect(), 5000);
+            }
+
             connect();
         </script>
     </body>
