@@ -371,8 +371,7 @@
                 ws = new WebSocket("ws://adatage.com:6580");
                 ws.onopen = () => {
                     ws.onmessage = (data) => {
-                        console.log(data);
-                        data = JSON.parse(data);
+                        data = JSON.parse(data.data);
                         if(data.action == "hello")
                             send(data);
                         if(data.action == "update")
