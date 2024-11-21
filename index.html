@@ -371,13 +371,6 @@
             }
 
             function connect() {
-                timeout = setTimeout(() => {
-                    Object.keys(sp.el.servicesList).forEach((c) => {
-                        Object.keys(sp.el.servicesList[c].list).forEach((s) => {
-                            sp.updateService(c, s, 6);
-                        });
-                    });
-                }, 500);
                 try {
                     ws = new WebSocket("ws://adatage.com:6580");
                     ws.onopen = () => {
@@ -401,6 +394,13 @@
                 } catch(e) {
                     retry();
                 }
+                timeout = setTimeout(() => {
+                    Object.keys(sp.el.servicesList).forEach((c) => {
+                        Object.keys(sp.el.servicesList[c].list).forEach((s) => {
+                            sp.updateService(c, s, 6);
+                        });
+                    });
+                }, 500);
             }
 
             function retry() {
