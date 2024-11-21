@@ -161,7 +161,6 @@
                     this.el.servicesList[c].status.setAttribute("class", "ion ion-ios-circle-filled text-component-1 "+this.texts[state].color);
                     Object.values(this.structure.services).forEach((st) => {
                         Object.values(st.list).forEach((stt) => {
-                            console.log(stt.state);
                             if(stt.state > state)
                                 state = stt.state;
                         });
