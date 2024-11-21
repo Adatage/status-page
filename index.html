@@ -364,12 +364,6 @@
                 }
             });
 
-            Object.keys(sp.el.servicesList).forEach((c) => {
-                Object.keys(sp.el.servicesList[c].list).forEach((s) => {
-                    sp.updateService(c, s, 6);
-                });
-            });
-
             function send(data) {
                 ws.send(JSON.stringify(data));
             }
