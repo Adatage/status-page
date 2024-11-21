@@ -42,8 +42,10 @@
             <p>© <span id="year"></span> Adatage. All rights reserved.</p>
         </div>
         <script>
+            var ws = null;
+
             document.getElementById("year").innerHTML = (new Date()).getFullYear();
-            
+
             if(window.location.protocol.includes("https"))
                 window.location.href = window.location.href.replace("https", "http");
 
@@ -56,6 +58,11 @@
                         servicesList: {}
                     };
                     this.texts = {
+                        0: {
+                            color: "orange",
+                            base: "Unknown",
+                            full: "Some services have unknown status"
+                        },
                         1: {
                             color: "green",
                             base: "Operational",
@@ -169,31 +176,31 @@
                         list: {
                             website: {
                                 name: "Website",
-                                state: 1
+                                state: 0
                             },
                             support: {
                                 name: "Support",
-                                state: 2
+                                state: 0
                             },
                             forum: {
                                 name: "Forums",
-                                state: 2
+                                state: 0
                             },
                             cdn: {
                                 name: "CDN",
-                                state: 1
+                                state: 0
                             },
                             webservices: {
                                 name: "Web Services",
-                                state: 1
+                                state: 0
                             },
                             emailserver: {
                                 name: "Email Server",
-                                state: 1
+                                state: 0
                             },
                             authoritativedns: {
                                 name: "Authoritative DNS",
-                                state: 1
+                                state: 0
                             }
                         }
                     },
@@ -202,15 +209,15 @@
                         list: {
                             cloudgamingwebsite: {
                                 name: "Website",
-                                state: 2
+                                state: 0
                             },
                             cloudgamingvms: {
                                 name: "Virtual Machines",
-                                state: 2
+                                state: 0
                             },
                             cloudgamingstorage: {
                                 name: "Storage",
-                                state: 2
+                                state: 0
                             }
                         }
                     },
@@ -219,27 +226,27 @@
                         list: {
                             cloudwebsite: {
                                 name: "Website",
-                                state: 2
+                                state: 0
                             },
                             cloudmanagement: {
                                 name: "Management",
-                                state: 2
+                                state: 0
                             },
                             cloudcontainers: {
                                 name: "Containers",
-                                state: 2
+                                state: 0
                             },
                             cloudvms: {
                                 name: "Virtual Machines",
-                                state: 2
+                                state: 0
                             },
                             cloudnetwork: {
                                 name: "Networks",
-                                state: 2
+                                state: 0
                             },
                             cloudapi: {
                                 name: "API",
-                                state: 2
+                                state: 0
                             }
                         }
                     },
@@ -248,11 +255,11 @@
                         list: {
                             mobileinfowebsite: {
                                 name: "Website",
-                                state: 2
+                                state: 0
                             },
                             mobileinfoservices: {
                                 name: "Services",
-                                state: 2
+                                state: 0
                             }
                         }
                     },
@@ -261,15 +268,15 @@
                         list: {
                             shortenerwebsite: {
                                 name: "Website",
-                                state: 2
+                                state: 0
                             },
                             shortenerredir: {
                                 name: "Redirect",
-                                state: 2
+                                state: 0
                             },
                             shortenerapi: {
                                 name: "API",
-                                state: 2
+                                state: 0
                             }
                         }
                     },
@@ -278,19 +285,19 @@
                         list: {
                             drivewebsite: {
                                 name: "Website",
-                                state: 2
+                                state: 0
                             },
                             driveservices: {
                                 name: "Services",
-                                state: 2
+                                state: 0
                             },
                             driveapi: {
                                 name: "API",
-                                state: 2
+                                state: 0
                             },
                             drivestorage: {
                                 name: "Storage",
-                                state: 2
+                                state: 0
                             }
                         }
                     },
@@ -299,19 +306,19 @@
                         list: {
                             codelabwebsite: {
                                 name: "Website",
-                                state: 2
+                                state: 0
                             },
                             codelabservices: {
                                 name: "Services",
-                                state: 2
+                                state: 0
                             },
                             codelabapi: {
                                 name: "API",
-                                state: 2
+                                state: 0
                             },
                             codelabcontainers: {
                                 name: "Containers",
-                                state: 2
+                                state: 0
                             }
                         }
                     },
@@ -320,19 +327,19 @@
                         list: {
                             accountmanagement: {
                                 name: "Management",
-                                state: 2
+                                state: 0
                             },
                             accountservices: {
                                 name: "Services",
-                                state: 2
+                                state: 0
                             },
                             accountapi: {
                                 name: "API",
-                                state: 2
+                                state: 0
                             },
                             account3ndparty: {
                                 name: "3nd Party Apps",
-                                state: 2
+                                state: 0
                             }
                         }
                     },
@@ -341,20 +348,40 @@
                         list: {
                             chatlinewebsite: {
                                 name: "Website",
-                                state: 2
+                                state: 0
                             },
                             chatlineservices: {
                                 name: "Services",
-                                state: 2
+                                state: 0
                             },
                             chatlineapi: {
                                 name: "API",
-                                state: 2
+                                state: 0
                             }
                         }
                     }
                 }
             });
+
+            function send(data) {
+                ws.send(JSON.stringify(data));
+            }
+
+            function connect() {
+                ws = new WebSocket("ws://adatage.com:6580");
+                ws.onopen = () => {
+                    ws.onmessage = (data) => {
+                        data = JSON.parse(data);
+                        if(data.action == "hello")
+                            send(data);
+                        if(data.action == "update")
+                            sp.updateService(data.c, data.s, data.state);
+                    };
+                    ws.onerror = () => setTimeout(() => connect(), 5000);
+                    ws.onclose = () => setTimeout(() => connect(), 5000);
+                };
+            }
+            connect();
         </script>
     </body>
 </html>
