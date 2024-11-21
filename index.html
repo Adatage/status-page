@@ -377,6 +377,12 @@
                                 send(data);
                             if(data.action == "update")
                                 sp.updateService(data.c, data.s, data.state);
+                            if(data.action == "updateall")
+                                Object.keys(data.data).forEach((c) => {
+                                    Object.keys(data.data[c]).forEach((s) => {
+                                        sp.updateService(c, s, data.data[c][s]);
+                                    });
+                                });
                         };
                     };
                     ws.onerror = () => retry();
