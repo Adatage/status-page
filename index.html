@@ -364,7 +364,11 @@
                 }
             });
 
-            var timeout = null;
+            Object.keys(sp.el.servicesList).forEach((c) => {
+                Object.keys(sp.el.servicesList[c].list).forEach((s) => {
+                    sp.updateService(c, s, 6);
+                });
+            });
 
             function send(data) {
                 ws.send(JSON.stringify(data));
@@ -374,7 +378,6 @@
                 try {
                     ws = new WebSocket("ws://adatage.com:6580");
                     ws.onopen = () => {
-                        clearTimeout(timeout);
                         ws.onmessage = (data) => {
                             data = JSON.parse(data.data);
                             if(data.action == "hello")
@@ -394,13 +397,6 @@
                 } catch(e) {
                     retry();
                 }
-                timeout = setTimeout(() => {
-                    Object.keys(sp.el.servicesList).forEach((c) => {
-                        Object.keys(sp.el.servicesList[c].list).forEach((s) => {
-                            sp.updateService(c, s, 6);
-                        });
-                    });
-                }, 500);
             }
 
             function retry() {
