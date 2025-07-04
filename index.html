@@ -46,9 +46,6 @@
 
             document.getElementById("year").innerHTML = (new Date()).getFullYear();
 
-            if(window.location.protocol.includes("https"))
-                window.location.href = window.location.href.replace("https", "http");
-
             class StatusPage {
                 constructor(structure) {
                     this.structure = structure;
